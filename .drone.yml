@@ -1,52 +1,38 @@
-clone:
-  git:
-    image: plugins/git
-    depth: 50
-    tags: true
+kind: pipeline
+name: default
 
-pipeline:
-  frontend:
-    image: node:8.1.2
-    group: laravel
+workspace:
+  base: /go
+  path: src/github.com/yourname/go-drone-hello-world
+
+steps:
+  - name: report
+    image: golang
+    volumes:
+      - name: reports
+        path: /var/reports
     commands:
-      - node -v
-      - npm -v
-      - yarn --version
-      - yarn config set cache-folder .yarn-cache
-      - yarn install
-      - yarn run production
+      - mkdir -p /var/reports
+      - go get
+      - go get github.com/360EntSecGroup-Skylar/goreporter
+      - goreporter -p ./ -f html -r /var/reports/
 
-  backend:
-    image: laradock/workspace:1.8-71
-    group: laravel
-    commands:
-      - php -v
-      - composer -V
-      - cp .env.example .env
-      - composer install --prefer-dist
-      - php artisan key:generate
-      - php artisan migrate
-      - ./vendor/bin/phpunit
+#  - name: build
+#    image: golang
+#    commands:
+#      - go get
+#      - go build -o output
+#      - chmod +x output
+#
+#  - name: run
+#    image: golang
+#    commands:
+#      - go get
+#      - go build -o output
+#      - chmod +x output
+#      - ./output
 
-  fb:
-    image: appleboy/drone-facebook
-    pull: true
-    secrets: [ fb_page_token, fb_verify_token ]
-    to: 1234973386524610
-    when:
-      event: [ push, pull_request ]
-      status: [ success, failure ]
-
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.3.0
-
-  redis:
-    image: redis:latest
-
-  postgres:
-    image: postgres:9.5.5
-    environment:
-      - POSTGRES_DB=homestead
-      - POSTGRES_USER=homestead
-      - POSTGRES_PASSWORD=secret
+volumes:
+  - name: reports
+    host:
+      path: /home/dev/work/src/github.com/cyantarek/drone-go-git-test/reports
