@@ -1,11 +1,7 @@
-# test for test
-kind: pipeline
-type: docker
-name: default
-
-steps:
-- name: greeting
-  image: alpine
-  commands:
-  - echo hello
-  - echo world
+pipeline:
+  resolve:
+    image: alpine
+    commands:
+      - cat /etc/resolv.conf
+    when:
+      status: [ success, failure ]
