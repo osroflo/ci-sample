@@ -1,6 +1,6 @@
 # test for
 kind: pipeline
-# type: docker
+type: docker
 name: default
 
 steps:
